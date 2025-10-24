@@ -145,7 +145,7 @@ while ($row = $result->fetch_assoc()) {
       box-shadow: 0 0 15px rgba(0,0,0,0.1);
       margin: 0 auto;
       overflow-y: scroll;
-      max-height: 300px;
+      max-height: 800px;
     }
 
     .sidebar {
