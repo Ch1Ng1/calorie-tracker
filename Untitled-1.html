@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+  <meta charset="UTF-8">
+  <title>Въртящ се квадрат</title>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background-color: #f0f8ff;
+      font-family: Arial, sans-serif;
+    }
+
+    .speech-bubble {
+      position: relative;
+      background: #ffffff;
+      border-radius: .4em;
+      padding: 10px 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    .speech-bubble::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border: 10px solid transparent;
+      border-top-color: #ffffff;
+    }
+
+    .square {
+      width: 100px;
+      height: 100px;
+      background-color: blue;
+      animation: rotate 3s linear infinite;
+    }
+
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="speech-bubble">Аз съм квадрат</div>
+  <div class="square"></div>
+</body>
+</html>
