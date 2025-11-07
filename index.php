@@ -9,7 +9,9 @@ include("conf.php");
 $conn = new mysqli($h, $u, $p, $db);
 $user_id = $_SESSION['user_id'];
 
-$stmt = $conn->prepare("SELECT date, food, calories FROM meals WHERE user_id = ? ORDER BY date DESC LIMIT 15");
+$stmt = $conn->prepare("SELECT id, date, food, calories FROM meals 
+                       WHERE user_id = ? AND date >= DATE_SUB(CURRENT_DATE, INTERVAL 14 DAY)
+                       ORDER BY date DESC, id DESC");
 
 $stmt->bind_param("i", $user_id);
 $stmt->execute();
@@ -28,12 +30,19 @@ while ($row = $result->fetch_assoc()) {
         $pastMeals[] = $row;
     }
 }
+
+// Затваряне на връзките с базата данни
+$stmt->close();
+$conn->close();
 ?>
 <!DOCTYPE html>
 <html lang="bg">
 <head>
-  <meta charset="UTF-8">
-  <title>Калории Тракер</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+    <title>Калории Тракер</title>
     <style>
       .testimonials {
   background: #f9fbe7;
@@ -145,7 +154,7 @@ while ($row = $result->fetch_assoc()) {
       box-shadow: 0 0 15px rgba(0,0,0,0.1);
       margin: 0 auto;
       overflow-y: scroll;
-      max-height: 800px;
+      max-height: 600px;
     }
 
     .sidebar {
@@ -255,7 +264,7 @@ while ($row = $result->fetch_assoc()) {
 .meal-suggestions li {
   margin-bottom: 8px;
 }
-.alert {
+    .alert {
             background-color: #ffe0e0;
             color: #a00;
             padding: 15px;
@@ -264,6 +273,16 @@ while ($row = $result->fetch_assoc()) {
             margin-bottom: 20px;
             font-family: Arial, sans-serif;
         }
+    .delete-btn {
+        color: #dc3545;
+        text-decoration: none;
+        padding: 5px 10px;
+        border-radius: 4px;
+    }
+    .delete-btn:hover {
+        background-color: #dc3545;
+        color: white;
+    }
   </style>
 
 </head>
@@ -279,8 +298,8 @@ while ($row = $result->fetch_assoc()) {
     <div class="form-inline">
       <form method="post" action="insert.php">
         <input type="date" name="date" max="<?= date('Y-m-d') ?>" required>
-        <input type="text" name="food"  maxlength="10" required placeholder="Храна">
-        <input type="number" name="calories" maxlength="4" required  min="5" max="5000"  placeholder="Калории">
+        <input type="text" name="food" maxlength="50" pattern="[A-Za-zА-Яа-я\s]+" required placeholder="Храна">
+        <input type="number" name="calories" min="5" max="5000" required placeholder="Калории" aria-label="Калории">
         <input type="submit" value="Добави">
       </form>
       <a href="logout.php" class="logout-btn">Изход</a>
@@ -289,15 +308,16 @@ while ($row = $result->fetch_assoc()) {
 
   <div class="layout">
     <div class="container">
-      <h3>Твоите хранения :)</h3>
+      <h3>Твоите хранения </h3>
       <table>
-        <tr><th>Дата</th><th>Храна</th><th>Калории</th></tr>
+        <tr><th>Дата</th><th>Храна</th><th>Калории</th><th>Действия</th></tr>
 
         <?php foreach ($pastMeals as $row): ?>
           <tr style="background:#f5f5f5;">
             <td><?= htmlspecialchars($row['date']) ?></td>
             <td><?= htmlspecialchars($row['food']) ?></td>
             <td><?= htmlspecialchars($row['calories']) ?></td>
+            <td><a href="delete.php?id=<?= $row['id'] ?>" onclick="return confirm('Сигурни ли сте?')" class="delete-btn">🗑️</a></td>
           </tr>
         <?php endforeach; ?>
 
@@ -306,17 +326,9 @@ while ($row = $result->fetch_assoc()) {
             <td><?= htmlspecialchars($row['date']) ?></td>
             <td><?= htmlspecialchars($row['food']) ?></td>
             <td><?= htmlspecialchars($row['calories']) ?></td>
+            <td><a href="delete.php?id=<?= $row['id'] ?>" onclick="return confirm('Сигурни ли сте?')" class="delete-btn">🗑️</a></td>
           </tr>
-          
         <?php endforeach; ?>
-        <?php
-        echo "<h2></h2>";
-echo "<ul>";
-while ($row = $result->fetch_assoc()) {
-    echo "<li>{$row['date']} – {$row['food']} ({$row['calories']} калории)</li>";
-}
-echo "</ul>";
-        ?>
 
         <tr style="background:#e0f7fa;">
           <td colspan="2"><strong>Общо за днес (<?= $today ?>)</strong></td>
