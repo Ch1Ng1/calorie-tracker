@@ -32,6 +32,30 @@ while ($row = $result->fetch_assoc()) {
 }
 
 // Затваряне на връзките с базата данни
+// Вземаме данните за графиката
+$conn = new mysqli($h, $u, $p, $db);
+$stmt = $conn->prepare("SELECT DATE(date) as date, SUM(calories) as total_calories 
+                       FROM meals 
+                       WHERE user_id = ? 
+                       AND date >= DATE_SUB(CURRENT_DATE, INTERVAL 1 MONTH)
+                       GROUP BY DATE(date)
+                       ORDER BY date ASC");
+
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$chartResult = $stmt->get_result();
+
+$dates = [];
+$caloriesData = [];
+
+while ($row = $chartResult->fetch_assoc()) {
+    $dates[] = $row['date'];
+    $caloriesData[] = $row['total_calories'];
+}
+
+$chartDates = json_encode($dates);
+$chartCalories = json_encode($caloriesData);
+
 $stmt->close();
 $conn->close();
 ?>
@@ -43,6 +67,7 @@ $conn->close();
     <meta http-equiv="X-Frame-Options" content="DENY">
     <meta http-equiv="X-XSS-Protection" content="1; mode=block">
     <title>Калории Тракер</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
       .testimonials {
   background: #f9fbe7;
@@ -283,6 +308,25 @@ $conn->close();
         background-color: #dc3545;
         color: white;
     }
+    .export-btn {
+        display: inline-block;
+        background-color: #28a745;
+        color: white;
+        padding: 10px 20px;
+        text-decoration: none;
+        border-radius: 5px;
+        font-weight: bold;
+        transition: background-color 0.3s;
+    }
+    .export-btn:hover {
+        background-color: #218838;
+    }
+    .chart-container {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    }
   </style>
 
 </head>
@@ -343,11 +387,12 @@ $conn->close();
 
     <div  class="tips">
   <h3>💡 Съвети за здравословен живот</h3>
-   <div class="chart">
-        <img  src="https://cdn.britannica.com/36/123536-050-95CB0C6E/Variety-fruits-vegetables.jpg" alt="Графика на калориите" width="100%">
+      <div class="chart-container" style="position: relative; height:400px; width:100%; margin: 20px 0;">
+        <canvas id="calorieChart"></canvas>
       </div>
-
-  <div class="accordion">
+      <div style="text-align: center; margin: 20px 0;">
+        <a href="export.php" class="export-btn">📊 Изтегли данните (CSV)</a>
+      </div>  <div class="accordion">
     <div class="accordion-item">
       <button class="accordion-header">💧 Хидратация</button>
       <div class="accordion-content">
@@ -394,6 +439,56 @@ $conn->close();
 </div>
 
   </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('calorieChart').getContext('2d');
+    const dates = <?= $chartDates ?>;
+    const calories = <?= $chartCalories ?>;
+    
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: dates,
+            datasets: [{
+                label: 'Калории за ден',
+                data: calories,
+                borderColor: '#00796b',
+                backgroundColor: 'rgba(0, 121, 107, 0.1)',
+                tension: 0.1,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Калории за последния месец',
+                    font: {
+                        size: 16
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Калории'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Дата'
+                    }
+                }
+            }
+        }
+    });
+});</script>
 
 <div class="meal-suggestions">
   <h3>🍽️ Препоръчани ястия</h3>
