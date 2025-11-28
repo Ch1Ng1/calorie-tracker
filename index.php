@@ -352,7 +352,7 @@ $conn->close();
 
   <div class="layout">
     <div class="container">
-      <h3>Твоите хранения </h3>
+      <h3>Твоите хранения :) </h3>
       <table>
         <tr><th>Дата</th><th>Храна</th><th>Калории</th><th>Действия</th></tr>
 
