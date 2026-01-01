@@ -66,7 +66,7 @@ $conn->close();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-Frame-Options" content="DENY">
     <meta http-equiv="X-XSS-Protection" content="1; mode=block">
-    <title>Калории Тракер</title>
+    <title>Калории Тракер - Моите Калории</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
       .testimonials {
