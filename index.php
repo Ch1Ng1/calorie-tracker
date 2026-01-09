@@ -9,6 +9,24 @@ include("conf.php");
 $conn = new mysqli($h, $u, $p, $db);
 $user_id = $_SESSION['user_id'];
 
+// Вземи дневната цел на потребителя (ако колоната съществува)
+$dailyGoal = 2000; // default
+try {
+    $stmtGoal = $conn->prepare("SELECT daily_goal FROM users WHERE id = ?");
+    if ($stmtGoal) {
+        $stmtGoal->bind_param("i", $user_id);
+        $stmtGoal->execute();
+        $goalResult = $stmtGoal->get_result();
+        if ($goalRow = $goalResult->fetch_assoc()) {
+            $dailyGoal = $goalRow['daily_goal'] ?? 2000;
+        }
+        $stmtGoal->close();
+    }
+} catch (Exception $e) {
+    // Колоната daily_goal още не съществува - използвай default
+    $dailyGoal = 2000;
+}
+
 $stmt = $conn->prepare("SELECT id, date, food, calories FROM meals 
                        WHERE user_id = ? AND date >= DATE_SUB(CURRENT_DATE, INTERVAL 14 DAY)
                        ORDER BY date DESC, id DESC");
@@ -55,6 +73,28 @@ while ($row = $chartResult->fetch_assoc()) {
 
 $chartDates = json_encode($dates);
 $chartCalories = json_encode($caloriesData);
+
+// Седмична статистика
+$conn2 = new mysqli($h, $u, $p, $db);
+$stmtWeek = $conn2->prepare("SELECT SUM(calories) as total FROM meals WHERE user_id = ? AND date >= DATE_SUB(CURRENT_DATE, INTERVAL 7 DAY)");
+$stmtWeek->bind_param("i", $user_id);
+$stmtWeek->execute();
+$weekResult = $stmtWeek->get_result();
+$weekTotal = $weekResult->fetch_assoc()['total'] ?? 0;
+$stmtWeek->close();
+
+// Месечна статистика
+$stmtMonth = $conn2->prepare("SELECT SUM(calories) as total FROM meals WHERE user_id = ? AND date >= DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY)");
+$stmtMonth->bind_param("i", $user_id);
+$stmtMonth->execute();
+$monthResult = $stmtMonth->get_result();
+$monthTotal = $monthResult->fetch_assoc()['total'] ?? 0;
+$stmtMonth->close();
+
+// Средна дневна норма за месец
+$avgDaily = count($dates) > 0 ? round($monthTotal / 30) : 0;
+
+$conn2->close();
 
 $stmt->close();
 $conn->close();
@@ -111,6 +151,32 @@ $conn->close();
       color: #333;
       text-align: center;
     }
+
+    /* Анимации */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .container, .sidebar, .tips {
+      animation: fadeIn 0.6s ease-out;
+    }
+
+    table tr {
+      animation: slideIn 0.4s ease-out;
+      animation-fill-mode: both;
+    }
+
+    table tr:nth-child(1) { animation-delay: 0.1s; }
+    table tr:nth-child(2) { animation-delay: 0.15s; }
+    table tr:nth-child(3) { animation-delay: 0.2s; }
+    table tr:nth-child(4) { animation-delay: 0.25s; }
+    table tr:nth-child(5) { animation-delay: 0.3s; }
 
     /* === НАВИГАЦИЯ === */
     .navbar {
@@ -180,6 +246,49 @@ $conn->close();
       margin: 0 auto;
       overflow-y: scroll;
       max-height: 600px;
+    }
+
+    /* Responsive дизайн */
+    @media (max-width: 768px) {
+      .navbar {
+        flex-direction: column;
+        padding: 15px;
+      }
+
+      .form-inline {
+        flex-direction: column;
+        width: 100%;
+      }
+
+      .form-inline input {
+        width: 100%;
+        margin-bottom: 5px;
+      }
+
+      .layout {
+        flex-direction: column;
+        margin: 15px;
+      }
+
+      .container {
+        max-height: none;
+        padding: 20px;
+      }
+
+      table {
+        font-size: 14px;
+      }
+
+      th, td {
+        padding: 8px 5px;
+      }
+
+      .logout-btn {
+        margin-left: 0;
+        margin-top: 10px;
+        width: 100%;
+        text-align: center;
+      }
     }
 
     .sidebar {
@@ -346,6 +455,7 @@ $conn->close();
         <input type="number" name="calories" min="5" max="5000" required placeholder="Калории" aria-label="Калории">
         <input type="submit" value="Добави">
       </form>
+      <a href="settings.php" class="logout-btn" style="background: #ff9800;">⚙️ Настройки</a>
       <a href="logout.php" class="logout-btn">Изход</a>
     </div>
   </div>
@@ -353,6 +463,28 @@ $conn->close();
   <div class="layout">
     <div class="container">
       <h3>Твоите хранения :) </h3>
+      
+      <!-- Статистика панел -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+          <div style="font-size: 14px; opacity: 0.9;">📅 Седмица</div>
+          <div style="font-size: 28px; font-weight: bold; margin: 5px 0;"><?= number_format($weekTotal) ?></div>
+          <div style="font-size: 12px; opacity: 0.8;">kcal общо</div>
+        </div>
+        
+        <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+          <div style="font-size: 14px; opacity: 0.9;">📊 Месец</div>
+          <div style="font-size: 28px; font-weight: bold; margin: 5px 0;"><?= number_format($monthTotal) ?></div>
+          <div style="font-size: 12px; opacity: 0.8;">kcal общо</div>
+        </div>
+        
+        <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+          <div style="font-size: 14px; opacity: 0.9;">📈 Средно дневно</div>
+          <div style="font-size: 28px; font-weight: bold; margin: 5px 0;"><?= $avgDaily ?></div>
+          <div style="font-size: 12px; opacity: 0.8;">kcal/ден</div>
+        </div>
+      </div>
+      
       <table>
         <tr><th>Дата</th><th>Храна</th><th>Калории</th><th>Действия</th></tr>
 
@@ -379,6 +511,30 @@ $conn->close();
           <td><strong><?= $totalCaloriesToday ?> kcal</strong></td>
         </tr>
       </table>
+
+      <!-- Progress Bar -->
+      <?php 
+        $progress = min(100, ($totalCaloriesToday / $dailyGoal) * 100);
+        $progressColor = $progress > 100 ? '#f44336' : ($progress > 80 ? '#ff9800' : '#4caf50');
+      ?>
+      <div style="margin: 20px auto; max-width: 600px;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+          <span style="font-weight: bold;">Дневен прогрес:</span>
+          <span><strong><?= $totalCaloriesToday ?></strong> / <?= $dailyGoal ?> kcal (<?= round($progress) ?>%)</span>
+        </div>
+        <div style="width: 100%; background: #e0e0e0; border-radius: 10px; height: 25px; overflow: hidden;">
+          <div style="width: <?= $progress ?>%; background: <?= $progressColor ?>; height: 100%; transition: width 0.5s ease; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 12px;">
+            <?= round($progress) ?>%
+          </div>
+        </div>
+        <?php if ($progress > 100): ?>
+          <p style="color: #f44336; margin-top: 5px; font-size: 14px;">⚠️ Надвишена дневна норма!</p>
+        <?php elseif ($progress > 80): ?>
+          <p style="color: #ff9800; margin-top: 5px; font-size: 14px;">⚡ Близо до целта!</p>
+        <?php else: ?>
+          <p style="color: #4caf50; margin-top: 5px; font-size: 14px;">✓ Добър прогрес!</p>
+        <?php endif; ?>
+      </div>
 
      
 
