@@ -446,7 +446,7 @@ $conn->close();
     </div>
 <?php endif; ?>
   <div class="navbar">
-     <a class="navbar-brand fw-bold" href="#page-top"><img class="nav-logo-size pe-1 d-inline-block align-text-top" src="https://i.postimg.cc/0Q3z3GRN/Screenshot-2025-10-06-113211.png" alt="Лого - Калориен Калкулатор"></a>
+     <a class="navbar-brand fw-bold" href="#page-top"><img class="nav-logo-size pe-1 d-inline-block align-text-top" src="" alt="Лого - Калориен Калкулатор"></a>
     <h2>Здравей, <?= htmlspecialchars($_SESSION['username']) ?>!</h2>
     <div class="form-inline">
       <form method="post" action="insert.php">
