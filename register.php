@@ -13,19 +13,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (strlen($username) < 3) {
         $errors[] = "Потребителското име трябва да е поне 3 символа.";
     }
+    if (strlen($username) > 20) {
+        $errors[] = "Името трябва да е до 20 символа.";
+    }
+    if (!preg_match('/^[A-Za-zА-Яа-я0-9\- ]+$/u', $username)) {
+        $errors[] = "Името не трябва да съдържа специални символи.";
+    }
     if (strlen($password) < 6) {
         $errors[] = "Паролата трябва да е поне 6 символа.";
     }
     if ($password !== $confirm) {
         $errors[] = "Паролите не съвпадат.";
     }
-    if (strlen($username) > 20) {
-        $errors[] = "Грешка: Името трябва да е до 20 символа.";
-}
 
-if (!preg_match('/^[A-Za-zА-Яа-я0-9\- ]+$/u', $username)) {
-    die("Грешка: Името не трябва да съдържа специални символи.");
-}
     if (empty($errors)) {
         $conn = new mysqli($h, $u, $p, $db);
 
@@ -40,13 +40,14 @@ if (!preg_match('/^[A-Za-zА-Яа-я0-9\- ]+$/u', $username)) {
         } else {
             $stmt->close();
 
-            // ⚠️ Тук използваме SHA256 (по твое желание без password_hash)
-            $hashed = hash("sha256", $password);
+            // Use password_hash for secure password storage
+            $hashed = password_hash($password, PASSWORD_DEFAULT);
 
             $stmt = $conn->prepare("INSERT INTO users (username, password) VALUES (?, ?)");
             $stmt->bind_param("ss", $username, $hashed);
             $stmt->execute();
 
+            session_regenerate_id(true);
             $_SESSION['user_id'] = $stmt->insert_id;
             $_SESSION['username'] = $username;
 

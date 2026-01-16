@@ -17,7 +17,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->bind_result($id, $hashed);
         $stmt->fetch();
 
-        if (hash("sha256", $password) === $hashed) {
+        if (password_verify($password, $hashed)) {
+            session_regenerate_id(true);
             $_SESSION['user_id'] = $id;
             $_SESSION['username'] = $username;
             header("Location: index.php");
@@ -78,7 +79,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   <?php if (isset($error)) echo "<p style='color:red;'>$error</p>"; ?>
   <form method="post">
     <input type="text" name="username" required placeholder="Потребителско име"><br>
-    <input type="password" maxlength="10" name="password"  required placeholder="Парола"><br>
+    <input type="password" name="password" required placeholder="Парола"><br>
     <input type="submit" value="Вход">
   </form>
   <p>Нямаш акаунт? <a href="register.php">Регистрация</a></p>

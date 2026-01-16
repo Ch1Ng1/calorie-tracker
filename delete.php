@@ -7,9 +7,15 @@ include("conf.php");
 
 if (isset($_GET['id']) && is_numeric($_GET['id'])) {
     $conn = new mysqli($h, $u, $p, $db);
-    $stmt = $conn->prepare("DELETE FROM meals WHERE id = ?");
-    $stmt->bind_param("i", $_GET['id']);
+    $user_id = $_SESSION['user_id'];
+    
+    // Security: Verify the meal belongs to the current user
+    $stmt = $conn->prepare("DELETE FROM meals WHERE id = ? AND user_id = ?");
+    $stmt->bind_param("ii", $_GET['id'], $user_id);
     $stmt->execute();
+    $stmt->close();
+    $conn->close();
 }
 header("Location: index.php");
+exit;
 ?>

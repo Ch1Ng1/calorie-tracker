@@ -50,8 +50,7 @@ while ($row = $result->fetch_assoc()) {
 }
 
 // Затваряне на връзките с базата данни
-// Вземаме данните за графиката
-$conn = new mysqli($h, $u, $p, $db);
+// Вземаме данните за графиката (използваме същата връзка)
 $stmt = $conn->prepare("SELECT DATE(date) as date, SUM(calories) as total_calories 
                        FROM meals 
                        WHERE user_id = ? 
@@ -74,9 +73,8 @@ while ($row = $chartResult->fetch_assoc()) {
 $chartDates = json_encode($dates);
 $chartCalories = json_encode($caloriesData);
 
-// Седмична статистика
-$conn2 = new mysqli($h, $u, $p, $db);
-$stmtWeek = $conn2->prepare("SELECT SUM(calories) as total FROM meals WHERE user_id = ? AND date >= DATE_SUB(CURRENT_DATE, INTERVAL 7 DAY)");
+// Седмична статистика (използваме същата връзка)
+$stmtWeek = $conn->prepare("SELECT SUM(calories) as total FROM meals WHERE user_id = ? AND date >= DATE_SUB(CURRENT_DATE, INTERVAL 7 DAY)");
 $stmtWeek->bind_param("i", $user_id);
 $stmtWeek->execute();
 $weekResult = $stmtWeek->get_result();
@@ -84,7 +82,7 @@ $weekTotal = $weekResult->fetch_assoc()['total'] ?? 0;
 $stmtWeek->close();
 
 // Месечна статистика
-$stmtMonth = $conn2->prepare("SELECT SUM(calories) as total FROM meals WHERE user_id = ? AND date >= DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY)");
+$stmtMonth = $conn->prepare("SELECT SUM(calories) as total FROM meals WHERE user_id = ? AND date >= DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY)");
 $stmtMonth->bind_param("i", $user_id);
 $stmtMonth->execute();
 $monthResult = $stmtMonth->get_result();
@@ -94,8 +92,7 @@ $stmtMonth->close();
 // Средна дневна норма за месец
 $avgDaily = count($dates) > 0 ? round($monthTotal / 30) : 0;
 
-$conn2->close();
-
+// Затваряме всички връзки
 $stmt->close();
 $conn->close();
 ?>

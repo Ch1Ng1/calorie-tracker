@@ -15,11 +15,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (
     isset($date, $food, $calories) &&
     !empty(trim($food)) &&
-    strlen(trim($food)) <= 10 &&
+    strlen(trim($food)) <= 50 &&
+    preg_match('/^[A-Za-zА-Яа-я\s]+$/u', trim($food)) &&
     is_numeric($calories) &&
-    strlen(trim($calories)) <= 4 &&
     $calories >= 0 &&
-    $calories <= 5001 &&
+    $calories <= 5000 &&
     strtotime($date) <= strtotime(date("Y-m-d"))
 ) 
 {
@@ -30,11 +30,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = $conn->prepare("INSERT INTO meals (date, food, calories, user_id) VALUES (?, ?, ?, ?)");
         $stmt->bind_param("ssii", $date, $food, $calories, $user_id);
         $stmt->execute();
+        $stmt->close();
+        $conn->close();
 
         header("Location: index.php");
         exit;
     } else {
-        $error = "❗ Моля, попълнете всички полета коректно. Храната трябва да е до 10 букви, калориите – до 4 цифри (0–9999), а датата не може да е в бъдещето.";
+        $error = "❌ Моля, попълнете всички полета коректно. Храната трябва да е до 50 букви (само букви), калориите – между 0-5000, а датата не може да е в бъдещето.";
     }
 }
 ?>
