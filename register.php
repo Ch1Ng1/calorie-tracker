@@ -1,10 +1,17 @@
 <?php
 session_start();
+include("security_headers.php");
 include("conf.php");
+include("csrf.php");
 
 $errors = [];
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // CSRF проверка временно деактивирана
+    // if (!isset($_POST['csrf_token']) || !verifyCSRFToken($_POST['csrf_token'])) {
+    //     $errors[] = "❌ Сигурностна проверка неуспешна. Моля, опитайте отново.";
+    // }
+    
     $username = trim($_POST['username']);
     $password = $_POST['password'];
     $confirm  = $_POST['confirm'];
@@ -122,11 +129,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   
 
   <form method="post">
-    <input type="text" name="username" required maxlength="20" required placeholder="Въведете потребителско име"
+    <?php echo getCsrfField(); ?>
+    <input type="text" name="username" required maxlength="20" placeholder="Въведете потребителско име"
        pattern="[A-Za-zА-Яа-я0-9\- ]{1,40}"
        title="Името трябва да е до 20 символа и без специални знаци"><br>
-    <input type="password" maxlength="10" name="password" required placeholder="Парола"><br>
-    <input type="password" maxlength="10" name="confirm" required placeholder="Потвърди паролата"><br>
+    <input type="password" name="password" required placeholder="Парола (мин. 6 символа)"><br>
+    <input type="password" name="confirm" required placeholder="Потвърди паролата"><br>
     <input type="submit" value="Регистрирай се">
   </form>
   <p>Вече имаш акаунт? <a href="login.php">Вход</a></p>

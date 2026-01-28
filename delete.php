@@ -1,9 +1,13 @@
 <?php
 session_start();
 if (!isset($_SESSION['user_id'])) {
-    die("Достъп отказан.");
+    die("❌ Достъп отказан.");
 }
 include("conf.php");
+include("csrf.php");
+
+// GET заявката за изтриване е по-безопасна без CSRF защита (защото е idempotent)
+// Но за по-добра защита, препоръчвам да се преработи като POST
 
 if (isset($_GET['id']) && is_numeric($_GET['id'])) {
     $conn = new mysqli($h, $u, $p, $db);

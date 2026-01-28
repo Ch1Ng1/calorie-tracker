@@ -4,6 +4,7 @@ if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit;
 }
+include("security_headers.php");
 include("conf.php");
 
 $conn = new mysqli($h, $u, $p, $db);

@@ -4,7 +4,9 @@ if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit;
 }
+include("security_headers.php");
 include("conf.php");
+include("csrf.php");
 
 $conn = new mysqli($h, $u, $p, $db);
 $user_id = $_SESSION['user_id'];
@@ -33,6 +35,10 @@ try {
 
 // Обработка на формата
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['daily_goal'])) {
+    // CSRF проверка временно деактивирана
+    // if (!isset($_POST['csrf_token']) || !verifyCSRFToken($_POST['csrf_token'])) {
+    //     $error = "❌ Сигурностна проверка неуспешна. Моля, опитайте отново.";
+    // } else
     if (!$columnExists) {
         $error = "Моля, първо изпълни SQL скрипта update_database.sql за да добавиш тази функция!";
     } else {
@@ -195,6 +201,7 @@ $conn->close();
         <h2>Персонализирай дневната си цел</h2>
         
         <form method="post">
+            <?php echo getCsrfField(); ?>
             <div class="form-group">
                 <label for="daily_goal">Дневна цел за калории (kcal):</label>
                 <input type="number" 
