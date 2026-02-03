@@ -63,170 +63,213 @@ $conn->close();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Настройки - Калории Тракер</title>
+    <link rel="stylesheet" href="style.css">
     <style>
         body {
-            font-family: 'Segoe UI', sans-serif;
-            background: #f0f4f8;
-            margin: 0;
-            padding: 20px;
-        }
-        .navbar {
-            background: #00796b;
-            color: white;
-            padding: 20px;
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
+
+        .settings-container {
+            flex: 1;
+            display: flex;
             align-items: center;
-            border-radius: 10px;
-            margin-bottom: 30px;
+            justify-content: center;
+            padding: 20px;
         }
-        .navbar a {
-            color: white;
-            text-decoration: none;
-            padding: 10px 15px;
-            background: #004d40;
-            border-radius: 5px;
-            transition: background 0.3s;
-        }
-        .navbar a:hover {
-            background: #00251a;
-        }
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
+
+        .settings-form {
             background: white;
             padding: 40px;
             border-radius: 10px;
-            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 500px;
         }
-        h2 {
+
+        .settings-form h2 {
+            text-align: center;
             color: #00796b;
-            margin-bottom: 30px;
+            margin-top: 0;
         }
+
         .form-group {
             margin-bottom: 20px;
+            text-align: left;
         }
-        label {
+
+        .form-group label {
             display: block;
             margin-bottom: 8px;
-            font-weight: bold;
+            font-weight: 600;
             color: #333;
         }
-        input[type="number"] {
+
+        .form-group input[type="number"],
+        .form-group select {
             width: 100%;
             padding: 12px;
             border: 2px solid #ddd;
             border-radius: 5px;
-            font-size: 16px;
+            font-size: 14px;
             box-sizing: border-box;
+            transition: border-color 0.3s;
         }
-        input[type="number"]:focus {
-            border-color: #00796b;
+
+        .form-group input[type="number"]:focus,
+        .form-group select:focus {
             outline: none;
+            border-color: #00796b;
+            box-shadow: 0 0 5px rgba(0, 121, 107, 0.2);
         }
-        .btn {
+
+        .form-group input[type="submit"] {
+            width: 100%;
+            padding: 12px;
             background: #00796b;
             color: white;
-            padding: 12px 30px;
             border: none;
             border-radius: 5px;
-            font-size: 16px;
             cursor: pointer;
-            transition: background 0.3s;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background-color 0.3s, transform 0.2s;
         }
-        .btn:hover {
+
+        .form-group input[type="submit"]:hover {
             background: #004d40;
+            transform: translateY(-2px);
         }
-        .message {
-            background: #d4edda;
-            color: #155724;
+
+        .success-message {
+            background-color: #c8e6c9;
+            color: #2e7d32;
             padding: 15px;
             border-radius: 5px;
             margin-bottom: 20px;
-            border: 1px solid #c3e6cb;
-        }
-        .error {
-            background: #f8d7da;
-            color: #721c24;
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-            border: 1px solid #f5c6cb;
-        }
-        .info-box {
-            background: #e8f5e9;
-            padding: 20px;
-            border-radius: 5px;
-            margin-top: 20px;
             border-left: 4px solid #4caf50;
         }
-        .info-box h3 {
-            margin-top: 0;
-            color: #2e7d32;
+
+        .error-message {
+            background-color: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 4px solid #f44336;
         }
-        .info-box ul {
-            margin: 10px 0;
-            padding-left: 20px;
+
+        .info-text {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
         }
-        .info-box li {
-            margin-bottom: 8px;
+
+        .back-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .back-link a {
+            color: #00796b;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+
+        .back-link a:hover {
+            color: #004d40;
+            text-decoration: underline;
+        }
+
+        @media (max-width: 767px) {
+            .settings-container {
+                padding: 15px;
+            }
+
+            .settings-form {
+                padding: 25px;
+            }
+
+            .settings-form h2 {
+                font-size: 22px;
+            }
+
+            .form-group input,
+            .form-group select {
+                font-size: 16px;
+                padding: 14px;
+            }
+        }
+
+        @media (max-width: 479px) {
+            .settings-container {
+                padding: 10px;
+            }
+
+            .settings-form {
+                padding: 20px;
+            }
+
+            .settings-form h2 {
+                font-size: 20px;
+            }
+
+            .form-group input,
+            .form-group select {
+                font-size: 16px;
+                padding: 12px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="navbar">
-        <h2>⚙️ Настройки</h2>
-        <a href="index.php">← Назад към начало</a>
-    </div>
+    <?php include("header.php"); ?>
 
-    <div class="container">
-        <?php if (!$columnExists): ?>
-            <div class="error">
-                <strong>⚠️ Важно!</strong><br>
-                Колоната 'daily_goal' не съществува в базата данни.<br>
-                Моля, изпълни SQL скрипта: <code>update_database.sql</code> в phpMyAdmin или MySQL конзолата.<br>
-                След това презареди страницата.
+    <div class="settings-container">
+        <div class="settings-form">
+            <h2>⚙️ Настройки</h2>
+
+            <?php if (isset($success)): ?>
+                <div class="success-message">
+                    ✓ <?= htmlspecialchars($success) ?>
+                </div>
+            <?php endif; ?>
+
+            <?php if (isset($error)): ?>
+                <div class="error-message">
+                    ❌ <?= htmlspecialchars($error) ?>
+                </div>
+            <?php endif; ?>
+
+            <form method="post" action="">
+                <?php echo getCsrfField(); ?>
+
+                <div class="form-group">
+                    <label for="daily_goal">Дневна дневна цел (Kcal):</label>
+                    <input type="number" id="daily_goal" name="daily_goal" min="500" max="5000" 
+                           value="<?= htmlspecialchars($currentGoal) ?>" required>
+                    <div class="info-text">Препоръчана стойност: 2000 kcal за възрастни</div>
+                </div>
+
+                <div class="form-group">
+                    <input type="submit" value="💾 Запази настройките">
+                </div>
+            </form>
+
+            <div class="back-link">
+                <a href="index.php">← Назад към начало</a>
             </div>
-        <?php endif; ?>
-        
-        <?php if (isset($message)): ?>
-            <div class="message"><?= htmlspecialchars($message) ?></div>
-        <?php endif; ?>
-        
-        <?php if (isset($error)): ?>
-            <div class="error"><?= htmlspecialchars($error) ?></div>
-        <?php endif; ?>
-
-        <h2>Персонализирай дневната си цел</h2>
-        
-        <form method="post">
-            <?php echo getCsrfField(); ?>
-            <div class="form-group">
-                <label for="daily_goal">Дневна цел за калории (kcal):</label>
-                <input type="number" 
-                       id="daily_goal" 
-                       name="daily_goal" 
-                       value="<?= $currentGoal ?>" 
-                       min="500" 
-                       max="5000" 
-                       step="50" 
-                       required>
-            </div>
-            <button type="submit" class="btn">💾 Запази промените</button>
-        </form>
-
-        <div class="info-box">
-            <h3>💡 Препоръки за дневна норма:</h3>
-            <ul>
-                <li><strong>Жени:</strong> 1800-2200 kcal (в зависимост от активността)</li>
-                <li><strong>Мъже:</strong> 2200-2800 kcal (в зависимост от активността)</li>
-                <li><strong>За отслабване:</strong> Намали с 300-500 kcal от нормата</li>
-                <li><strong>За качване на тегло:</strong> Увеличи с 300-500 kcal</li>
-                <li><strong>Спортуващи:</strong> Увеличи с 500-1000 kcal в зависимост от натоварването</li>
-            </ul>
-            <p><em>Текуща цел: <strong><?= $currentGoal ?> kcal/ден</strong></em></p>
         </div>
     </div>
+
+    <footer class="footer">
+        <p>&copy; 2025 Калории Тракер | Всички права запазени</p>
+    </footer>
 </body>
 </html>
