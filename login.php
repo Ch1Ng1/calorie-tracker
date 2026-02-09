@@ -34,61 +34,81 @@ function checkRateLimit($username) {
 }
 
 function recordFailedAttempt($username) {
-    if (!isset($_SESSION['login_attempts'])) {
-        $_SESSION['login_attempts'] = array();
-    }
-    if (!isset($_SESSION['login_attempts'][$username])) {
-        $_SESSION['login_attempts'][$username] = array('count' => 0, 'time' => time());
-    }
-    $_SESSION['login_attempts'][$username]['count']++;
+  if (!isset($_SESSION['login_attempts'])) {
+    $_SESSION['login_attempts'] = array();
+  }
+  if (!isset($_SESSION['login_attempts'][$username])) {
+    $_SESSION['login_attempts'][$username] = array('count' => 0, 'time' => time());
+  }
+  $_SESSION['login_attempts'][$username]['count']++;
+  // Обнови времевия маркер при неуспешен опит
+  $_SESSION['login_attempts'][$username]['time'] = time();
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // CSRF проверка временно деактивирана - работи се на поправката
-    // if (!isset($_POST['csrf_token']) || !verifyCSRFToken($_POST['csrf_token'])) {
-    //     $error = "❌ Сигурностна проверка неуспешна. Моля, опитайте отново.";
-    // } else {
-        $username = trim($_POST['username']);
-        
-        // Проверка на rate limiting
-        if (!checkRateLimit($username)) {
-            $error = "❌ Твърде много неуспешни опита за вход. Моля, попробвайте отново за 15 минути.";
+  // Възстановена CSRF проверка
+  if (!isset($_POST['csrf_token']) || !verifyCSRFToken($_POST['csrf_token'])) {
+    $error = "❌ Сигурностна проверка неуспешна. Моля, опитайте отново.";
+  } else {
+    $username = trim(filter_input(INPUT_POST, 'username', FILTER_SANITIZE_STRING) ?? '');
+    $password = $_POST['password'] ?? '';
+
+    if ($username === '') {
+      $error = 'Моля, въведете потребителско име.';
+    } else {
+      // Проверка на rate limiting
+      if (!checkRateLimit($username)) {
+        $error = "❌ Твърде много неуспешни опита за вход. Моля, попробвайте отново за 15 минути.";
+      } else {
+        $conn = new mysqli($h, $u, $p, $db);
+
+        if ($conn->connect_error) {
+          error_log('DB connection error: ' . $conn->connect_error);
+          $error = 'Вътрешна сървърна грешка.';
         } else {
-            $password = $_POST['password'];
-
-            $conn = new mysqli($h, $u, $p, $db);
-
-            $stmt = $conn->prepare("SELECT id, password FROM users WHERE username = ?");
+          $stmt = $conn->prepare("SELECT id, password FROM users WHERE username = ?");
+          if (!$stmt) {
+            error_log('DB prepare failed: ' . $conn->error);
+            $error = 'Вътрешна сървърна грешка.';
+          } else {
             $stmt->bind_param("s", $username);
             $stmt->execute();
             $stmt->store_result();
 
-            if ($stmt->num_rows > 0) {
-                $stmt->bind_result($id, $hashed);
-                $stmt->fetch();
+            // Единно съобщение за невалидни данни (предотвратява потребителско изброяване)
+            $genericInvalid = 'Невалидни идентификационни данни.';
 
-                if (password_verify($password, $hashed)) {
-                    // Успешен вход - нулирай броячa на неуспешни опити
-                    $_SESSION['login_attempts'][$username] = array('count' => 0, 'time' => time());
-                    
-                    session_regenerate_id(true);
-                    $_SESSION['user_id'] = $id;
-                    $_SESSION['username'] = $username;
-                    header("Location: index.php");
-                    exit;
-                } else {
-                    recordFailedAttempt($username);
-                    $error = "Грешна парола.";
-                }
-            } else {
+            if ($stmt->num_rows > 0) {
+              $stmt->bind_result($id, $hashed);
+              $stmt->fetch();
+
+              if (password_verify($password, $hashed)) {
+                // Успешен вход - нулирай броячa на неуспешни опити
+                $_SESSION['login_attempts'][$username] = array('count' => 0, 'time' => time());
+
+                session_regenerate_id(true);
+                $_SESSION['user_id'] = $id;
+                $_SESSION['username'] = $username;
+                $stmt->close();
+                $conn->close();
+                header("Location: index.php");
+                exit;
+              } else {
                 recordFailedAttempt($username);
-                $error = "Потребителят не съществува.";
+                $error = $genericInvalid;
+              }
+            } else {
+              recordFailedAttempt($username);
+              $error = $genericInvalid;
             }
 
             $stmt->close();
-            $conn->close();
+          }
+          $conn->close();
         }
-    // } // Край на закоментирана CSRF проверка
+      }
+    }
+  }
 }
 ?>
 <!DOCTYPE html>
