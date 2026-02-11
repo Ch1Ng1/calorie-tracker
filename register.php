@@ -82,6 +82,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       min-height: 100vh;
       margin: 0;
       padding: 0;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background-attachment: fixed;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
 
     .register-container {
@@ -95,22 +99,45 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     .register-form {
       background: white;
       padding: 40px;
-      border-radius: 10px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      border-radius: 15px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.1);
       width: 100%;
       max-width: 450px;
+      animation: fadeInUp 0.6s ease-out;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     .register-form h2 {
       margin-top: 0;
       text-align: center;
-      color: #00796b;
+      color: #667eea;
+      margin-bottom: 10px;
+      font-size: 28px;
+      font-weight: 700;
+    }
+
+    .welcome-text {
+      text-align: center;
+      color: #666;
       margin-bottom: 30px;
+      font-size: 16px;
+      line-height: 1.5;
     }
 
     .form-group {
-      margin-bottom: 15px;
+      margin-bottom: 20px;
       text-align: left;
+      position: relative;
     }
 
     .form-group label {
@@ -118,42 +145,68 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       margin-bottom: 8px;
       font-weight: 600;
       color: #333;
+      font-size: 14px;
     }
 
     .form-group input[type="text"],
     .form-group input[type="password"] {
       width: 100%;
-      padding: 12px;
-      border: 1px solid #ddd;
-      border-radius: 5px;
+      padding: 12px 12px 12px 40px;
+      border: 2px solid #e1e5e9;
+      border-radius: 8px;
       font-size: 14px;
       box-sizing: border-box;
-      transition: border-color 0.3s;
+      transition: all 0.3s ease;
+      background: #f8f9fa;
     }
 
     .form-group input[type="text"]:focus,
     .form-group input[type="password"]:focus {
       outline: none;
-      border-color: #00796b;
-      box-shadow: 0 0 5px rgba(0, 121, 107, 0.2);
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      background: white;
+    }
+
+    .form-group::before {
+      content: '';
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 20px;
+      height: 20px;
+      background-size: contain;
+      background-repeat: no-repeat;
+      opacity: 0.6;
+    }
+
+    .form-group:nth-child(1)::before {
+      background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJDMTMuMSAyIDE0IDIuOSAxNCA0VjE2QzE0IDE3LjEgMTMuMSAxOCA5IDE4VjIwQzE0LjQgMjAgMTYgMTguNCAxNiAxNkgyMEMxNiAxMy42IDE0LjQgMTIgMTIgMTJDMTMuMSAxMiAxNCAxMS4xIDE0IDEwVjRDMTQgMi45IDEzLjEgMiAxMiAyWk0xMiA0QzEyLjU1IDQgMTMgNC40NSAxMyA1VjEwQzEzIDEwLjU1IDEyLjU1IDExIDEyIDExQzExLjQ1IDExIDExIDEwLjU1IDExIDEwVjVDMTEgNC40NSAxMS40NSA0IDEyIDRaIiBmaWxsPSIjNjY3ZWVhIi8+Cjwvc3ZnPgo=');
+    }
+
+    .form-group:nth-child(2)::before,
+    .form-group:nth-child(3)::before {
+      background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJDMTMuMSAyIDE0IDIuOSAxNCA0VjE2QzE0IDE3LjEgMTMuMSAxOCA5IDE4VjIwQzE0LjQgMjAgMTYgMTguNCAxNiAxNkgyMEMxNiAxMy42IDE0LjQgMTIgMTIgMTJDMTMuMSAxMiAxNCAxMS4xIDE0IDEwVjRDMTQgMi45IDEzLjEgMiAxMiAyWk0xMiA0QzEyLjU1IDQgMTMgNC40NSAxMyA1VjEwQzEzIDEwLjU1IDEyLjU1IDExIDEyIDExQzExLjQ1IDExIDExIDEwLjU1IDExIDEwVjVDMTEgNC40NSAxMS40NSA0IDEyIDRaIiBmaWxsPSIjNjY3ZWVhIi8+Cjwvc3ZnPgo=');
     }
 
     .form-group input[type="submit"] {
       width: 100%;
-      padding: 12px;
-      background: #00796b;
+      padding: 14px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
       border: none;
-      border-radius: 5px;
+      border-radius: 8px;
       cursor: pointer;
       font-size: 16px;
       font-weight: 600;
-      transition: background-color 0.3s, transform 0.2s;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
     }
 
     .form-group input[type="submit"]:hover {
-      background: #004d40;
       transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
     }
 
     .form-group input[type="submit"]:active {
@@ -162,30 +215,37 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     .form-links {
       text-align: center;
-      margin-top: 20px;
+      margin-top: 25px;
       padding-top: 20px;
-      border-top: 1px solid #eee;
+      border-top: 1px solid #e1e5e9;
     }
 
     .form-links a {
-      color: #00796b;
+      color: #667eea;
       text-decoration: none;
       font-weight: 600;
       transition: color 0.3s;
     }
 
     .form-links a:hover {
-      color: #004d40;
+      color: #764ba2;
       text-decoration: underline;
     }
 
     .error-list {
-      background-color: #ffebee;
+      background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
       color: #c62828;
       padding: 15px;
-      border-radius: 5px;
+      border-radius: 8px;
       margin-bottom: 20px;
       border-left: 4px solid #c62828;
+      animation: shake 0.5s ease-in-out;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
     }
 
     .error-list ul {
@@ -199,7 +259,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     .info-text {
       font-size: 12px;
-      color: #666;
+      color: #888;
       margin-top: 5px;
     }
 
@@ -209,19 +269,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       }
 
       .register-form {
-        padding: 25px;
+        padding: 30px;
       }
 
       .register-form h2 {
         font-size: 24px;
-        margin-bottom: 25px;
+        margin-bottom: 20px;
+      }
+
+      .welcome-text {
+        font-size: 14px;
       }
 
       .form-group input[type="text"],
       .form-group input[type="password"],
       .form-group input[type="submit"] {
         font-size: 16px;
-        padding: 14px;
+        padding: 14px 14px 14px 40px;
       }
     }
 
@@ -231,23 +295,33 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       }
 
       .register-form {
-        padding: 20px;
+        padding: 25px;
       }
 
       .register-form h2 {
-        font-size: 20px;
-        margin-bottom: 20px;
+        font-size: 22px;
+        margin-bottom: 15px;
+      }
+
+      .welcome-text {
+        font-size: 13px;
       }
 
       .form-group {
-        margin-bottom: 12px;
+        margin-bottom: 15px;
       }
 
       .form-group input[type="text"],
       .form-group input[type="password"],
       .form-group input[type="submit"] {
         font-size: 16px;
-        padding: 12px;
+        padding: 12px 12px 12px 35px;
+      }
+
+      .form-group::before {
+        left: 10px;
+        width: 18px;
+        height: 18px;
       }
     }
   </style>
@@ -258,6 +332,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   <div class="register-container">
     <div class="register-form">
       <h2>📝 Регистрация</h2>
+      <p class="welcome-text">Добре дошъл! Създай си акаунт и започни да следиш калориите си лесно и удобно. 🚀</p>
       
       <?php if (!empty($errors)): ?>
         <div class="error-list">

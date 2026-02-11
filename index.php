@@ -439,8 +439,8 @@ $conn->close();
             </tr>
           </thead>
           <tbody>
-            <?php foreach ($pastMeals as $row): ?>
-              <tr style="background:#f5f5f5;">
+            <?php foreach ($todayMeals as $row): ?>
+              <tr style="background:#e8f5e9;">
                 <td><?= htmlspecialchars($row['date']) ?></td>
                 <td><?= htmlspecialchars($row['food']) ?></td>
                 <td><?= htmlspecialchars($row['calories']) ?></td>
@@ -448,8 +448,8 @@ $conn->close();
               </tr>
             <?php endforeach; ?>
 
-            <?php foreach ($todayMeals as $row): ?>
-              <tr style="background:#e8f5e9;">
+            <?php foreach ($pastMeals as $row): ?>
+              <tr style="background:#f5f5f5;">
                 <td><?= htmlspecialchars($row['date']) ?></td>
                 <td><?= htmlspecialchars($row['food']) ?></td>
                 <td><?= htmlspecialchars($row['calories']) ?></td>
