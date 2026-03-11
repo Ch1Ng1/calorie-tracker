@@ -1,5 +1,5 @@
 <?php
-session_start();
+include("session_config.php");
 session_destroy();
 
 // Пренасочване към login или начална страница

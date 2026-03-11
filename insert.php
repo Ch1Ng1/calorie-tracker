@@ -1,5 +1,5 @@
 <?php
-session_start();
+include("session_config.php");
 $error = "";
 
 if (!isset($_SESSION['user_id'])) {
